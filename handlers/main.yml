@@ -1,0 +1,61 @@
+# Systemd daemon
+- name: reload systemd daemon
+  systemd:
+    daemon_reload: True
+
+
+
+# Default style exporters
+- name: restart prometheus exporter node
+  systemd:
+    name: prometheus-node-exporter
+    state: restarted
+    enabled: True
+
+- name: restart prometheus exporter blackbox
+  systemd:
+    name: prometheus-blackbox-exporter
+    state: restarted
+    enabled: True
+
+- name: restart prometheus exporter uwsgi
+  systemd:
+    name: prometheus-uwsgi-exporter
+    state: restarted
+    enabled: True
+
+- name: restart prometheus exporter postgres
+  systemd:
+    name: prometheus-postgres-exporter
+    state: restarted
+    enabled: True
+
+- name: restart prometheus exporter elasticsearch
+  systemd:
+    name: prometheus-elasticsearch-exporter
+    state: restarted
+    enabled: True
+
+
+
+# Custom style exporters
+- name: restart prometheus-nginxlog-exporter
+  systemd:
+    name: prometheus-nginxlog-exporter
+    state: restarted
+    enabled: True
+
+- name: restart prometheus-node-exporter
+  systemd:
+    name: prometheus-node-exporter
+    state: restarted
+    enabled: True
+
+
+
+# Other services
+- name: restart lighttpd
+  systemd:
+    name: lighttpd
+    state: restarted
+    enabled: True

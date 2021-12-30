@@ -1,0 +1,115 @@
+- name: include basic setup tasks
+  include_tasks: basics.yml
+
+- name: include tasks for node exporter
+  include_tasks: "exporters/default.yml"
+  when: prometheus_exporter_node == True
+  vars:
+    prometheus_exporter_default_name: "node"
+    prometheus_exporter_default_url: "{{ prometheus_exporter_node_url }}"
+    prometheus_exporter_default_version: "{{ prometheus_exporter_node_version }}"
+    prometheus_exporter_default_user: "{{ prometheus_exporter_node_user }}"
+    prometheus_exporter_default_group: "{{ prometheus_exporter_node_group }}"
+    #prometheus_exporter_default_config:
+    #prometheus_exporter_default_env:
+    prometheus_exporter_systemd_name: "node"
+    prometheus_exporter_systemd_service_arguments: "{{ prometheus_exporter_node_systemd_service_arguments }}"
+    #prometheus_exporter_systemd_env:
+
+- name: include tasks for node textfile exporter
+  include_tasks: "exporters/node-textfile.yml"
+  when: prometheus_exporter_node_textfile == True
+
+- name: include tasks for selenium
+  include_tasks: "exporters/selenium.yml"
+  when: prometheus_exporter_selenium == True
+
+- name: include tasks for blackbox exporter
+  include_tasks: "exporters/default.yml"
+  when: prometheus_exporter_blackbox == True
+  vars:
+    prometheus_exporter_default_name: "blackbox"
+    prometheus_exporter_default_url: "{{ prometheus_exporter_blackbox_url }}"
+    prometheus_exporter_default_version: "{{ prometheus_exporter_blackbox_version }}"
+    prometheus_exporter_default_user: "{{ prometheus_exporter_blackbox_user }}"
+    prometheus_exporter_default_group: "{{ prometheus_exporter_blackbox_group }}"
+    prometheus_exporter_default_config: "{{ prometheus_exporter_blackbox_config }}"
+    prometheus_exporter_systemd_name: "blackbox"
+    prometheus_exporter_systemd_service_arguments: "{{ prometheus_exporter_blackbox_systemd_service_arguments }}"
+
+- name: include tasks for uwsgi exporter
+  include_tasks: "exporters/default.yml"
+  when: prometheus_exporter_uwsgi == True
+  vars:
+    prometheus_exporter_default_name: "uwsgi"
+    prometheus_exporter_default_url: "{{ prometheus_exporter_uwsgi_url }}"
+    prometheus_exporter_default_version: "{{ prometheus_exporter_uwsgi_version }}"
+    prometheus_exporter_default_user: "{{ prometheus_exporter_uwsgi_user }}"
+    prometheus_exporter_default_group: "{{ prometheus_exporter_uwsgi_group }}"
+    prometheus_exporter_systemd_name: "uwsgi"
+    prometheus_exporter_systemd_service_arguments: "{{ prometheus_exporter_uwsgi_systemd_service_arguments }}"
+
+- name: include tasks for postgres exporter
+  include_tasks: "exporters/default.yml"
+  when: prometheus_exporter_postgres == True
+  vars:
+    prometheus_exporter_default_name: "postgres"
+    prometheus_exporter_default_url: "{{ prometheus_exporter_postgres_url }}"
+    prometheus_exporter_default_version: "{{ prometheus_exporter_postgres_version }}"
+    prometheus_exporter_default_user: "{{ prometheus_exporter_postgres_user }}"
+    prometheus_exporter_default_group: "{{ prometheus_exporter_postgres_group }}"
+    prometheus_exporter_systemd_name: "postgres"
+    prometheus_exporter_default_env: "{{ prometheus_exporter_postgres_env }}"
+    prometheus_exporter_default_archive_name: "{{ prometheus_exporter_postgres_archive_name }}"
+    prometheus_exporter_systemd_service_arguments: "{{ prometheus_exporter_postgres_systemd_service_arguments }}"
+
+- name: include tasks for redis exporter
+  include_tasks: "exporters/default.yml"
+  when: prometheus_exporter_redis == True
+  vars:
+    prometheus_exporter_default_name: "redis"
+    prometheus_exporter_default_url: "{{ prometheus_exporter_redis_url }}"
+    prometheus_exporter_default_version: "{{ prometheus_exporter_redis_version }}"
+    prometheus_exporter_default_user: "{{ prometheus_exporter_redis_user }}"
+    prometheus_exporter_default_group: "{{ prometheus_exporter_redis_group }}"
+    prometheus_exporter_systemd_name: "redis"
+    prometheus_exporter_default_archive_name: "{{ prometheus_exporter_redis_archive_name }}"
+    prometheus_exporter_systemd_service_arguments: "{{ prometheus_exporter_redis_systemd_service_arguments }}"
+
+- name: include tasks for node nginxlog exporter
+  include_tasks: "exporters/nginxlog.yml"
+  when: prometheus_exporter_nginxlog == True
+
+- name: include tasks for elasticsearch exporter
+  include_tasks: "exporters/default.yml"
+  when: prometheus_exporter_elasticsearch == True
+  vars:
+    prometheus_exporter_default_name: "elasticsearch"
+    prometheus_exporter_default_url: "{{ prometheus_exporter_elasticsearch_url }}"
+    prometheus_exporter_default_version: "{{ prometheus_exporter_elasticsearch_version }}"
+    prometheus_exporter_default_user: "{{ prometheus_exporter_elasticsearch_user }}"
+    prometheus_exporter_default_group: "{{ prometheus_exporter_elasticsearch_group }}"
+    prometheus_exporter_systemd_name: "elasticsearch"
+    prometheus_exporter_systemd_service_arguments: "{{ prometheus_exporter_elasticsearch_systemd_service_arguments }}"
+
+- name: include tasks for absent exporters
+  include_tasks: "exporters/remove.yml"
+  with_items:
+    - name: node
+      present: "{{ prometheus_exporter_node }}"
+    - name: blackbox
+      present: "{{ prometheus_exporter_blackbox }}"
+    - name: nginxlog
+      present: "{{ prometheus_exporter_nginxlog }}"
+    - name: postgres
+      present: "{{ prometheus_exporter_postgres }}"
+    - name: uwsgi
+      present: "{{ prometheus_exporter_uwsgi }}"
+  loop_control:
+    loop_var: prometheus_exporter_remove
+  when: prometheus_exporter_remove['present'] == False
+
+
+
+- name: include lighttpd tasks
+  include_tasks: lighttpd.yml

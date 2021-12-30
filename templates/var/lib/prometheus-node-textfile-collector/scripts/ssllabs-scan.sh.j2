@@ -1,0 +1,48 @@
+#!/bin/bash
+#
+# Scan a https website with ssllabs.com
+# Using ssllabs-scan cli: https://github.com/ssllabs/ssllabs-scan/
+
+
+
+ssllabs_scan_version="{{ prometheus_exporter_node_textfile_ssllabs_version }}"
+
+# Download binary if not present in defined version
+if [ ! -d /usr/local/src/ssllabs-scan/$ssllabs_scan_version/ ]; then
+    mkdir -p /usr/local/src/ssllabs-scan/$ssllabs_scan_version
+    cd /usr/local/src/ssllabs-scan/$ssllabs_scan_version/
+    wget --quiet "https://github.com/ssllabs/ssllabs-scan/releases/download/v${ssllabs_scan_version}/ssllabs-scan_${ssllabs_scan_version}-linux64.tgz" 2>&1 >/dev/null
+    tar xzf "ssllabs-scan_${ssllabs_scan_version}-linux64.tgz" 2>&1 >/dev/null
+    ln -sf /usr/local/src/ssllabs-scan/$ssllabs_scan_version/ssllabs-scan /usr/local/bin/ssllabs-scan
+fi
+
+
+
+# Check hosts
+# Doc on grades: https://qualys-secure.force.com/discussions/s/article/000005828
+echo "# HELP ssllabs_scan scan a website using ssllabs.com"
+echo "# TYPE ssllabs_scan gauge"
+
+{% for prometheus_exporter_node_textfile_ssllabs_host in prometheus_exporter_node_textfile_ssllabs_hosts %}
+ssllabs_scan_host="{{ prometheus_exporter_node_textfile_ssllabs_host }}"
+ssllabs_scan_result=$(/usr/local/bin/ssllabs-scan -quiet -grade -hostcheck -maxage 23 -usecache $ssllabs_scan_host)
+if [[ "$ssllabs_scan_result" == *'"A+"'* ]]; then
+    ssllabs_scan_rating=0
+elif [[ "$ssllabs_scan_result" == *'"A"'* ]]; then
+    ssllabs_scan_rating=1
+elif [[ "$ssllabs_scan_result" == *'"B"'* ]]; then
+    ssllabs_scan_rating=2
+elif [[ "$ssllabs_scan_result" == *'"C"'* ]]; then
+    ssllabs_scan_rating=3
+elif [[ "$ssllabs_scan_result" == *'"D"'* ]]; then
+    ssllabs_scan_rating=4
+elif [[ "$ssllabs_scan_result" == *'"E"'* ]]; then
+    ssllabs_scan_rating=5
+elif [[ "$ssllabs_scan_result" == *'"F"'* ]]; then
+    ssllabs_scan_rating=6
+else
+    ssllabs_scan_rating=7
+fi
+echo "ssllabs_scan{host=\"${ssllabs_scan_host}\"} $ssllabs_scan_rating"
+
+{% endfor %}

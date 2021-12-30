@@ -1,0 +1,35 @@
+# Prometheus exporter port to path association
+# {{ ansible_managed }}
+
+{% for prometheus_exporters_port in prometheus_exporters_ports %}
+{% if 'blackbox' not in prometheus_exporters_port['name'] %}
+$HTTP["url"] == "/{{ prometheus_exporters_port['name'] }}" {
+    proxy.server = (
+        "" => ( (
+            "host" => "127.0.0.1",
+            "port" => "{{ prometheus_exporters_port['port'] }}"
+        ) )
+    )
+    proxy.header = (
+        "map-urlpath" => (
+            "/{{ prometheus_exporters_port['name'] }}" => "/metrics"
+        )
+    )
+}
+{% else %}
+$HTTP["url"] == "/{{ prometheus_exporters_port['name'] }}" {
+    proxy.server = (
+        "" => ( (
+            "host" => "127.0.0.1",
+            "port" => "{{ prometheus_exporters_port['port'] }}"
+        ) )
+    )
+    proxy.header = (
+        "map-urlpath" => (
+            "/{{ prometheus_exporters_port['name'] }}" => "/probe"
+        )
+    )
+}
+{% endif %}
+
+{% endfor %}

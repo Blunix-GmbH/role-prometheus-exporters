@@ -1,0 +1,30 @@
+- name: "exporter {{ prometheus_exporter_remove['name'] }} absent check if files are present"
+  stat:
+    path: "/etc/systemd/system/prometheus_{{ prometheus_exporter_remove['name'] }}_exporter.service"
+  register: prometheus_exporter_stat_systemd_file
+
+- name: "exporter {{ prometheus_exporter_remove['name'] }} absent stop systemd service"
+  systemd:
+    name: "prometheus_{{ prometheus_exporter_remove['name'] }}_exporter.service"
+    state: stopped
+    enabled: False
+    force: True
+  when: prometheus_exporter_stat_systemd_file.stat.exists
+
+- name: "exporter {{ prometheus_exporter_remove['name'] }} absent remove files"
+  file:
+    state: absent
+    path: "{{ prometheus_exporter_absent_directory }}"
+  with_items:
+    - "/usr/local/src/prometheus-exporters/{{ prometheus_exporter_remove['name'] }}"
+    - "/etc/prometheus-exporters/{{ prometheus_exporter_remove['name'] }}"
+    - "/usr/local/bin/prometheus_{{ prometheus_exporter_remove['name'] }}_exporter"
+    - "/etc/systemd/system/prometheus-{{ prometheus_exporter_remove['name'] }}-exporter.service"
+  loop_control:
+    loop_var: prometheus_exporter_absent_directory
+  register: prometheus_exporter_files_absent_changed
+
+- name: reload systemd
+  systemd:
+    daemon_reload: True
+  when: prometheus_exporter_stat_systemd_file.stat.exists

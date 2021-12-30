@@ -1,0 +1,12 @@
+#!/bin/bash
+#
+# checks if shorewall is running
+
+
+echo "# HELP shorewall_running checks if shorewall is running"
+echo "# TYPE shorewall_running gauge"
+if /sbin/shorewall status | grep running 2>&1 >/dev/null; then
+    echo "shorewall_running 1"
+else
+    echo "shorewall_running 0"
+fi

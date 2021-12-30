@@ -1,0 +1,60 @@
+- name: add lighttpd group
+  group:
+    name: lighttpd
+    system: True
+    gid: 131
+
+- name: add lighttpd user
+  user:
+    name: lighttpd
+    home: /nonexistent
+    create_home: False
+    shell: /usr/sbin/nologin
+    system: True
+    uid: 131
+
+- name: install lighttpd
+  apt:
+    name:
+      - lighttpd
+      - lighttpd-mod-openssl
+    state: present
+
+- name: chown /var/log/lighttpd
+  file:
+    state: directory
+    path: /var/log/lighttpd
+    owner: lighttpd
+    group: lighttpd
+    mode: 0750
+
+- name: create /var/log/lighttpd/error.log for lighttpd user
+  file:
+    state: touch
+    path: /var/log/lighttpd/error.log
+    owner: lighttpd
+    group: lighttpd
+    mode: 0640
+
+- name: template /etc/lighttpd/lighttpd.conf
+  template:
+    src: templates/etc/lighttpd/lighttpd.conf.j2
+    dest: /etc/lighttpd/lighttpd.conf
+    owner: root
+    group: root
+    mode: 0640
+  notify: restart lighttpd
+
+- name: template prometheus exporter proxy vhost
+  template:
+    src: templates/etc/lighttpd/conf-enabled/99-prometheus-exporters.conf.j2
+    dest: /etc/lighttpd/conf-enabled/99-prometheus-exporters.conf
+    owner: root
+    group: root
+    mode: 0640
+  notify: restart lighttpd
+
+- name: remove lighttpd default vhost
+  file:
+    path: /etc/lighttpd/conf-enabled/99-unconfigured.conf
+    state: absent

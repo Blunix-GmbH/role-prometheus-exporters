@@ -1,0 +1,25 @@
+- name: "exporter nginxlog {{ prometheus_exporter_nginxlog_version }} install deb"
+  apt:
+    deb: "{{ prometheus_exporter_nginxlog_url }}"
+    state: present
+  notify: restart prometheus-nginxlog-exporter
+
+- name: "exporter nginxlog {{ prometheus_exporter_nginxlog_version }} template config file"
+  template:
+    src: templates/etc/prometheus-nginxlog-exporter.hcl.j2
+    dest: /etc/prometheus-nginxlog-exporter.hcl
+    owner: www-data
+    group: www-data
+    mode: 0640
+  notify: restart prometheus-nginxlog-exporter
+
+- name: "exporter nginxlog {{ prometheus_exporter_nginxlog_version }} patch systemd unit file"
+  template:
+    src: templates/lib/systemd/system/prometheus-nginxlog-exporter.service.j2
+    dest: /lib/systemd/system/prometheus-nginxlog-exporter.service
+    owner: root
+    group: root
+    mode: 0640
+  notify:
+    - reload systemd daemon
+    - restart prometheus-nginxlog-exporter

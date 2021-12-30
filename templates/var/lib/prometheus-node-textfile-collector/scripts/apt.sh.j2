@@ -1,0 +1,66 @@
+#!/bin/bash
+#
+# Export apt metrics
+
+
+
+# apt upgrades available
+echo "# HELP apt_upgrades number of available apt upgrades"
+echo "# TYPE apt_upgrades gauge"
+echo "apt_upgrades $(/usr/bin/apt-get upgrade -s | grep '^Inst' | wc -l)"
+
+
+# apt security upgrades available
+echo "# HELP apt_security_upgrades number of available apt security upgrades"
+echo "# TYPE apt_security_upgrades gauge"
+echo "apt_security_upgrades $(/usr/bin/apt-get upgrade -s | grep -i 'Debian-Security' | grep '^Inst' | wc -l)"
+
+
+# reboot required
+echo "# HELP apt_reboot_required is a reboot required by apt"
+echo "# TYPE apt_reboot_required gauge"
+if [ -f /var/run/reboot-required ]; then
+    echo "apt_reboot_required 1"
+else
+    echo "apt_reboot_required 0"
+fi
+
+
+# kernel version available
+kernel_latest=$(ls /boot/|grep vmlinuz- | sort | tail -n 1 | sed 's/vmlinuz-//g ; s/-[^-]*//2g ; s/-/./g')
+kernel_latest_version=$(echo $kernel_latest | cut -d '.' -f 1)
+kernel_latest_major_revision=$(echo $kernel_latest | cut -d '.' -f 2)
+kernel_latest_minor_revision=$(echo $kernel_latest | cut -d '.' -f 3)
+kernel_latest_patch_number=$(echo $kernel_latest | cut -d '.' -f 4)
+
+kernel_used=$(uname -r | sed 's/-[^-]*//2g ; s/-/./g')
+kernel_used_version=$(echo $kernel_used | cut -d '.' -f 1)
+kernel_used_major_revision=$(echo $kernel_used | cut -d '.' -f 2)
+kernel_used_minor_revision=$(echo $kernel_used | cut -d '.' -f 3)
+kernel_used_patch_number=$(echo $kernel_used | cut -d '.' -f 4)
+
+echo "# HELP kernel_latest_version latest available kernel version"
+echo "# TYPE kernel_latest_version gauge"
+echo kernel_latest_version $kernel_latest_version
+echo "# HELP kernel_latest_major_revision latest available kernel major revision"
+echo "# TYPE kernel_latest_major_revision gauge"
+echo kernel_latest_major_revision $kernel_latest_major_revision
+echo "# HELP kernel_latest_minor_revision latest available kernel minor revision"
+echo "# TYPE kernel_latest_minor_revision gauge"
+echo kernel_latest_minor_revision $kernel_latest_minor_revision
+echo "# HELP kernel_latest_patch_number latest available kernel patch number"
+echo "# TYPE kernel_latest_patch_number gauge"
+echo kernel_latest_patch_number $kernel_latest_patch_number
+
+echo "# HELP kernel_used_version used kernel version"
+echo "# TYPE kernel_used_version gauge"
+echo kernel_used_version $kernel_used_version
+echo "# HELP kernel_used_major_revision used kernel major revision"
+echo "# TYPE kernel_used_major_revision gauge"
+echo kernel_used_major_revision $kernel_used_major_revision
+echo "# HELP kernel_used_minor_revision used kernel minor revision"
+echo "# TYPE kernel_used_minor_revision gauge"
+echo kernel_used_minor_revision $kernel_used_minor_revision
+echo "# HELP kernel_used_patch_number used kernel patch number"
+echo "# TYPE kernel_used_patch_number gauge"
+echo kernel_used_patch_number $kernel_used_patch_number

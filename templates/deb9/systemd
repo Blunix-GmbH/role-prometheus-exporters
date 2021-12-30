@@ -1,0 +1,12 @@
+[Unit]
+Description=Lighttpd Daemon
+After=network.target
+
+[Service]
+Type=simple
+ExecStartPre=/usr/local/bin/lighttpd -tt -m /usr/lib/lighttpd -f /etc/lighttpd/lighttpd.conf
+ExecStart=/usr/local/bin/lighttpd -D -m /usr/lib/lighttpd -f /etc/lighttpd/lighttpd.conf
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

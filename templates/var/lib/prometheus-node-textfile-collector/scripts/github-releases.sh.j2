@@ -1,0 +1,52 @@
+#!/bin/bash
+#
+# Check for new github releases
+# Found at https://gist.github.com/lukechilds/a83e1d7127b78fef38c2914c4ececc3c
+
+
+{% for prometheus_exporter_node_textfile_github_release in prometheus_exporter_node_textfile_github_releases %}
+# Variables
+github_repo="{{ prometheus_exporter_node_textfile_github_release['repo'] }}"
+used_release="{{ prometheus_exporter_node_textfile_github_release['version'] }}"
+
+# Evaluate
+used_release_cleaned=$(echo $used_release | sed 's/[^.0-9]*//g')
+used_major_version=$(echo $used_release_cleaned | cut -d '.' -f 1)
+used_minor_version=$(echo $used_release_cleaned | cut -d '.' -f 2)
+used_patch_version=$(echo $used_release_cleaned | cut -d '.' -f 3)
+latest_release=$(curl --silent "https://api.github.com/repos/${github_repo}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/' | sed 's/[^.0-9]*//g')
+latest_major_version=$(echo $latest_release | cut -d '.' -f 1)
+latest_minor_version=$(echo $latest_release | cut -d '.' -f 2)
+latest_patch_version=$(echo $latest_release | cut -d '.' -f 3)
+
+# Aggregate results
+result_github_release_used_major_version="{% if not loop.first %}{{ '${result_github_release_used_major_version}\\n' }}{% endif %}github_release_used_major_version{repo=\"$github_repo\",used=\"$used_release\",latest=\"$latest_release\"} $used_major_version"
+result_github_release_used_minor_version="{% if not loop.first %}{{ '${result_github_release_used_minor_version}\\n' }}{% endif %}github_release_used_minor_version{repo=\"$github_repo\",used=\"$used_release\",latest=\"$latest_release\"} $used_minor_version"
+result_github_release_used_patch_version="{% if not loop.first %}{{ '${result_github_release_used_patch_version}\\n' }}{% endif %}github_release_used_patch_version{repo=\"$github_repo\",used=\"$used_release\",latest=\"$latest_release\"} $used_patch_version"
+result_github_release_latest_major_version="{% if not loop.first %}{{ '${result_github_release_latest_major_version}\\n' }}{% endif %}github_release_latest_major_version{repo=\"$github_repo\",used=\"$used_release\",latest=\"$latest_release\"} $latest_major_version"
+result_github_release_latest_minor_version="{% if not loop.first %}{{ '${result_github_release_latest_minor_version}\\n' }}{% endif %}github_release_latest_minor_version{repo=\"$github_repo\",used=\"$used_release\",latest=\"$latest_release\"} $latest_minor_version"
+result_github_release_latest_patch_version="{% if not loop.first %}{{ '${result_github_release_latest_patch_version}\\n' }}{% endif %}github_release_latest_patch_version{repo=\"$github_repo\",used=\"$used_release\",latest=\"$latest_release\"} $latest_patch_version"
+
+{% endfor %}
+
+
+# Print results
+echo "# HELP github_release_used_major_version used release major version"
+echo "# TYPE github_release_used_major_version gauge"
+echo -e "$result_github_release_used_major_version"
+echo "# HELP github_release_used_minor_version used release minor version"
+echo "# TYPE github_release_used_minor_version gauge"
+echo -e "$result_github_release_used_minor_version"
+echo "# HELP github_release_used_patch_version used release patch version"
+echo "# TYPE github_release_used_patch_version gauge"
+echo -e "$result_github_release_used_patch_version"
+
+echo "# HELP github_release_latest_major_version latest release major version"
+echo "# TYPE github_release_latest_major_version gauge"
+echo -e "$result_github_release_latest_major_version"
+echo "# HELP github_release_latest_minor_version latest release minor version"
+echo "# TYPE github_release_latest_minor_version gauge"
+echo -e "$result_github_release_latest_minor_version"
+echo "# HELP github_release_latest_patch_version latest release patch version"
+echo "# TYPE github_release_latest_patch_version gauge"
+echo -e "$result_github_release_latest_patch_version"

@@ -1,0 +1,245 @@
+prometheus_exporters_lighttpd_server_bind: 0.0.0.0
+prometheus_exporters_lighttpd_server_port: 10999
+
+
+# prometheus exporter default ports for proxy pass with lighttpd
+# Doc https://github.com/prometheus/prometheus/wiki/Default-port-allocations
+prometheus_exporters_ports:
+    # https://github.com/prometheus/node_exporter
+  - name: node
+    port: 10900
+    # https://github.com/prometheus/blackbox_exporter
+  - name: blackbox
+    port: 10901
+    # https://github.com/martin-helmich/prometheus-nginxlog-exporter
+  - name: nginxlog
+    port: 10902
+    # https://github.com/timonwong/uwsgi_exporter
+  - name: uwsgi
+    port: 10903
+    # https://github.com/wrouesnel/postgres_exporter
+  - name: postgres
+    port: 10904
+    # https://github.com/oliver006/redis_exporter
+  - name: redis
+    port: 10905
+  - name: elasticsearch
+    port: 10906
+
+
+
+# Configure used exporters
+prometheus_exporter_node: True
+prometheus_exporter_node_version: 1.0.1
+prometheus_exporter_node_url: "https://github.com/prometheus/node_exporter/releases/download/v{{ prometheus_exporter_node_version }}/node_exporter-{{ prometheus_exporter_node_version }}.linux-amd64.tar.gz"
+prometheus_exporter_node_user: root
+prometheus_exporter_node_group: root
+prometheus_exporter_node_systemd_service_arguments: |
+  --log.level=info \
+  --web.listen-address="127.0.0.1:10900" \
+  --web.max-requests="1" \
+  --collector.disable-defaults \
+  --collector.arp \
+  --collector.bcache \
+  --collector.conntrack \
+  --collector.cpu \
+  --collector.cpufreq \
+  --collector.diskstats \
+  --collector.entropy \
+  --collector.filesystem \
+  --collector.hwmon \
+  --collector.interrupts \
+  --collector.loadavg \
+  --collector.logind \
+  --collector.meminfo \
+  --collector.mountstats \
+  --collector.netclass \
+  --collector.netdev \
+  --collector.netstat \
+  --collector.nfs \
+  --collector.nfsd \
+  --collector.ntp \
+  --collector.ntp.server="127.0.0.1" \
+  --collector.ntp.protocol-version=4 \
+  --collector.processes \
+  --collector.systemd \
+  --collector.systemd.enable-task-metrics \
+  --collector.systemd.enable-restarts-metrics \
+  --collector.systemd.enable-start-time-metrics \
+  --collector.textfile \
+  --collector.textfile.directory /var/lib/prometheus-node-textfile-collector/logs \
+  --collector.time \
+  --collector.udp_queues \
+  --collector.uname \
+  --collector.vmstat
+
+
+prometheus_exporter_blackbox: False
+prometheus_exporter_blackbox_version: 0.17.0
+prometheus_exporter_blackbox_url: "https://github.com/prometheus/blackbox_exporter/releases/download/v{{ prometheus_exporter_blackbox_version }}/blackbox_exporter-{{ prometheus_exporter_blackbox_version }}.linux-amd64.tar.gz"
+prometheus_exporter_blackbox_user: prometheus-exporter
+prometheus_exporter_blackbox_group: prometheus-exporter
+# https://github.com/prometheus/blackbox_exporter/blob/master/CONFIGURATION.md
+prometheus_exporter_blackbox_config_defaults: |
+  modules:
+    http_2xx:
+      prober: http
+      timeout: 5s
+      http:
+        valid_http_versions:
+          - "HTTP/1.1"
+          - "HTTP/2.0"
+        method: GET
+        headers:
+          Accept-Language: en-US
+        no_follow_redirects: false
+        fail_if_not_ssl: true
+# prometheus_exporter_blackbox_config_custom:
+prometheus_exporter_blackbox_config: "{{ prometheus_exporter_blackbox_config_defaults + prometheus_exporter_blackbox_config_custom | default('') | indent(2, first=True) }}"
+prometheus_exporter_blackbox_systemd_service_arguments: |
+  --config.file="/etc/prometheus-exporters/blackbox/config.yml" \
+  --log.level=info \
+  --web.listen-address="127.0.0.1:10901"
+
+prometheus_exporter_uwsgi: False
+prometheus_exporter_uwsgi_version: 1.0.0
+prometheus_exporter_uwsgi_url: "https://github.com/timonwong/uwsgi_exporter/releases/download/v{{ prometheus_exporter_uwsgi_version }}/uwsgi_exporter-{{ prometheus_exporter_uwsgi_version }}.linux-amd64.tar.gz"
+prometheus_exporter_uwsgi_user: root
+prometheus_exporter_uwsgi_group: root
+prometheus_exporter_uwsgi_systemd_service_arguments: |
+      --stats.uri="{{ prometheus_exporter_uwsgi_stats_uri }}" \
+      --log.level=info \
+      --web.listen-address="127.0.0.1:10903"
+
+
+prometheus_exporter_postgres: False
+prometheus_exporter_postgres_version: 0.8.0
+prometheus_exporter_postgres_url: "https://github.com/wrouesnel/postgres_exporter/releases/download/v{{ prometheus_exporter_postgres_version }}/postgres_exporter_v{{ prometheus_exporter_postgres_version }}_linux-amd64.tar.gz"
+prometheus_exporter_postgres_user: postgres
+prometheus_exporter_postgres_group: postgres
+prometheus_exporter_postgres_archive_name: "postgres_exporter_v{{ prometheus_exporter_postgres_version }}_linux-amd64"
+# Example config: https://github.com/prometheus/blackbox_exporter/blob/master/example.yml
+# Format here is text not yaml!
+# NOTE execute the sql commands here: https://github.com/wrouesnel/postgres_exporter#running-as-non-superuser
+prometheus_exporter_postgres_env: |
+      DATA_SOURCE_NAME="postgresql://postgres_exporter:{{ prometheus_exporter_vars_postgres_password }}@{{ nic_wg_mesh_ip }}:5432/postgres?sslmode=disable"
+prometheus_exporter_postgres_systemd_service_arguments: |
+      --auto-discover-databases \
+      --log.level=info \
+      --web.listen-address="127.0.0.1:10904"
+
+
+prometheus_exporter_redis: False
+prometheus_exporter_redis_version: 1.10.0
+prometheus_exporter_redis_url: "https://github.com/oliver006/redis_exporter/releases/download/v{{ prometheus_exporter_redis_version }}/redis_exporter-v{{ prometheus_exporter_redis_version }}.linux-amd64.tar.gz"
+prometheus_exporter_redis_user: redis
+prometheus_exporter_redis_group: redis
+prometheus_exporter_redis_archive_name: "redis_exporter-v{{ prometheus_exporter_redis_version }}.linux-amd64"
+prometheus_exporter_redis_systemd_service_arguments: |
+    --redis.addr="redis://127.0.0.1:6379" \
+    --redis.password="" \
+    --web.listen-address="127.0.0.1:10905"
+
+
+prometheus_exporter_node_textfile: True
+prometheus_exporter_node_textfile_downloads_defaults:
+  - name: ntpd_metrics.py
+    src: "https://raw.githubusercontent.com/prometheus-community/node-exporter-textfile-collector-scripts/master/ntpd_metrics.py"
+    user: root
+    cron:
+      minute: "*/5"
+prometheus_exporter_node_textfile_downloads_custom: []
+prometheus_exporter_node_textfile_downloads: "{{ prometheus_exporter_node_textfile_downloads_defaults + prometheus_exporter_node_textfile_downloads_custom }}"
+prometheus_exporter_node_textfile_templates_defaults:
+  - name: ssl-cert-expiration.sh
+    src: "templates/var/lib/prometheus-node-textfile-collector/scripts/ssl-cert-expiration.sh.j2"
+    user: root
+    cron:
+      minute: "0"
+      hour: "0"
+  - name: entropy.sh
+    src: "templates/var/lib/prometheus-node-textfile-collector/scripts/entropy.sh.j2"
+  - name: apt.sh
+    src: "templates/var/lib/prometheus-node-textfile-collector/scripts/apt.sh.j2"
+    user: root
+    cron:
+      minute: "0"
+      hour: "*/3"
+  - name: dnscrypt-proxy.sh
+    src: "templates/var/lib/prometheus-node-textfile-collector/scripts/dnscrypt-proxy.sh.j2"
+  - name: open-files.sh
+    src: "templates/var/lib/prometheus-node-textfile-collector/scripts/open-files.sh.j2"
+    user: root
+    cron:
+      minute: "*/15"
+  - name: cron-unmonitored.sh
+    src: "templates/var/lib/prometheus-node-textfile-collector/scripts/cron-unmonitored.sh.j2"
+    user: root
+    cron:
+      minute: "0"
+      hour: "0"
+  - name: shorewall.sh
+    src: "templates/var/lib/prometheus-node-textfile-collector/scripts/shorewall.sh.j2"
+    user: root
+prometheus_exporter_node_textfile_templates_custom: []
+prometheus_exporter_node_textfile_templates: "{{ prometheus_exporter_node_textfile_templates_defaults + prometheus_exporter_node_textfile_templates_custom }}"
+prometheus_exporter_node_textfile_ssl_certs:
+  - "/etc/letsencrypt/live/{{ inventory_hostname }}/fullchain.pem"
+
+prometheus_exporter_selenium: False
+prometheus_exporter_selenium_access_users: []
+
+prometheus_exporters_python3_pip3_packages:
+  # ionos status
+  - urllib3
+  - beautifulsoup4
+
+prometheus_exporter_node_textfile_github_releases_defaults:
+  - repo: "prometheus/node_exporter"
+    version: "{{ prometheus_exporter_node_version }}"
+  - repo: "prometheus/blackbox_exporter"
+    version: "{{ prometheus_exporter_blackbox_version }}"
+  - repo: "timonwong/uwsgi_exporter"
+    version: "{{ prometheus_exporter_uwsgi_version }}"
+  - repo: "wrouesnel/postgres_exporter"
+    version: "{{ prometheus_exporter_postgres_version }}"
+  - repo: "oliver006/redis_exporter"
+    version: "{{ prometheus_exporter_redis_version }}"
+  - repo: "martin-helmich/prometheus-nginxlog-exporter"
+    version: "{{ prometheus_exporter_nginxlog_version }}"
+  - repo: "justwatchcom/elasticsearch_exporter"
+    version: "{{ prometheus_exporter_elasticsearch_version }}"
+prometheus_exporter_node_textfile_github_releases_custom: []
+prometheus_exporter_node_textfile_github_releases: "{{ prometheus_exporter_node_textfile_github_releases_defaults + prometheus_exporter_node_textfile_github_releases_custom }}"
+
+prometheus_exporter_nginxlog: False
+prometheus_exporter_nginxlog_version: 1.6.0
+prometheus_exporter_nginxlog_url: "https://github.com/martin-helmich/prometheus-nginxlog-exporter/releases/download/v{{ prometheus_exporter_nginxlog_version }}/prometheus-nginxlog-exporter_{{ prometheus_exporter_nginxlog_version }}_linux_amd64.deb"
+prometheus_exporter_nginxlog_format_blunix: |
+  "host=\"$host\" addr=\"$remote_addr\" user=\"$remote_user\" time=\"$time_local\" req=\"$request\" stat=\"$status\" bbs=\"$body_bytes_sent\" refe=\"$http_referer\" agnt=\"$http_user_agent\" rt=\"$request_time\" cc=\"$sent_http_cache_control\" uct=\"$upstream_connect_time\" uht=\"$upstream_header_time\" urt=\"$upstream_response_time\" port=\"$server_port\""
+prometheus_exporter_nginxlog_namespaces: []
+# Example prometheus_exporter_nginxlog_namespaces:
+#   - namespace: prometheus
+#     format: "{{ prometheus_exporter_nginxlog_format_blunix }}"
+#     source:
+#       files:
+#         - "/var/log/nginx/prometheus-server.log"
+#     # source:
+#     #   syslog:
+#     #     listen_address: "udp://127.0.0.1:10902"
+#     #     format: "rfc3164"
+#     labels:
+#       app: prometheus
+#       env: prod
+#     tags:
+#       - nginx
+
+
+prometheus_exporter_elasticsearch: False
+prometheus_exporter_elasticsearch_version: 1.1.0
+prometheus_exporter_elasticsearch_url: "https://github.com/justwatchcom/elasticsearch_exporter/releases/download/v{{ prometheus_exporter_elasticsearch_version }}/elasticsearch_exporter-{{ prometheus_exporter_elasticsearch_version }}.linux-amd64.tar.gz"
+prometheus_exporter_elasticsearch_user: elasticsearch
+prometheus_exporter_elasticsearch_group: elasticsearch
+prometheus_exporter_elasticsearch_systemd_service_arguments: |
+    --es.uri="http://127.0.0.1:9200" \
+    --web.listen-address="127.0.0.1:10906"

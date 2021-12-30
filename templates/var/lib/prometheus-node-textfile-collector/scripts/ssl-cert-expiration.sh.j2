@@ -1,0 +1,27 @@
+#!/bin/bash
+#
+# Calculate seconds until expiration of local ssl certificate files
+
+
+{% for prometheus_exporter_node_textfile_ssl_cert in prometheus_exporter_node_textfile_ssl_certs %}
+# SSL certificate {{ prometheus_exporter_node_textfile_ssl_cert }}
+if [ -f {{ prometheus_exporter_node_textfile_ssl_cert }} ]; then
+    certificate_present=1
+    expiration_date=$(date --date="$(openssl x509 -enddate -noout -in {{ prometheus_exporter_node_textfile_ssl_cert }} 2>/dev/null | cut -d= -f 2)" +%s)
+    current_date=$(date +%s)
+    expiration_in_seconds=$(printf "%s\n" $(( $expiration_date - $current_date )))
+else
+    certificate_present=0
+    expiration_in_seconds=0
+fi
+
+echo "# HELP ssl_cert_present is the ssl certificate present or not"
+echo "# TYPE ssl_cert_present gauge"
+echo "ssl_cert_present{path=\"{{ prometheus_exporter_node_textfile_ssl_cert }}\"} $certificate_present"
+
+echo "# HELP ssl_cert_expiration_seconds seconds until local ssl certificate expires"
+echo "# TYPE ssl_cert_expiration_seconds gauge"
+echo "ssl_cert_expiration_seconds{path=\"{{ prometheus_exporter_node_textfile_ssl_cert }}\"} $expiration_in_seconds"
+
+
+{% endfor %}

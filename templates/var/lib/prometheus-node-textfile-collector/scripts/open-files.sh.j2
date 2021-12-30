@@ -1,0 +1,13 @@
+#!/bin/bash
+#
+# Export stats about global filedescrptors
+
+
+
+echo "# HELP filedescriptor_max maximum number of available fildescriptors"
+echo "# TYPE filedescriptor_max gauge"
+echo "filedescriptor_max $(cat /proc/sys/fs/file-max)"
+
+echo "# HELP filedescriptor_open number of used filedescriptors"
+echo "# TYPE filedescriptor_open gauge"
+echo "filedescriptor_open $(lsof | wc -l)"

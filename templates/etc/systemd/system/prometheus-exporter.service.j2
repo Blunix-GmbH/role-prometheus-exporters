@@ -1,0 +1,22 @@
+# {{ ansible_managed }}
+
+[Unit]
+Description=Node Exporter
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User={{ prometheus_exporter_default_user }}
+Group={{ prometheus_exporter_default_group }}
+{% if prometheus_exporter_default_env is defined %}
+EnvironmentFile=/etc/prometheus-exporters/{{ prometheus_exporter_systemd_name }}/env.conf
+{% endif %}
+{% if prometheus_exporter_systemd_service_arguments is defined %}
+ExecStart=/usr/local/bin/prometheus_{{ prometheus_exporter_systemd_name }}_exporter \
+    {{ prometheus_exporter_systemd_service_arguments | indent(4) }}
+{% else %}
+ExecStart=/usr/local/bin/prometheus_{{ prometheus_exporter_systemd_name }}_exporter
+{% endif %}
+
+[Install]
+WantedBy=default.target

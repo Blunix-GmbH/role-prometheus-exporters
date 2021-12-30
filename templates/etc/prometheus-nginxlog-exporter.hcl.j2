@@ -1,0 +1,34 @@
+listen {
+  port = 10902
+  address = "127.0.0.1"
+  metrics_endpoint = "/metrics"
+}
+
+
+{% for prometheus_exporter_nginxlog_namespace in prometheus_exporter_nginxlog_namespaces %}
+namespace "{{ prometheus_exporter_nginxlog_namespace['namespace'] }}" {
+    format = {{ prometheus_exporter_nginxlog_namespace['format'] }}
+    source {
+{% if prometheus_exporter_nginxlog_namespace['source']['files'] is defined %}
+        files = [{{ prometheus_exporter_nginxlog_namespace['source']['files'] | map('to_json') | join(", ") }}]
+    }
+{% endif %}
+{% if prometheus_exporter_nginxlog_namespace['source']['syslog'] is defined %}
+        syslog {
+            listen_address = "{{ prometheus_exporter_nginxlog_namespace['source']['syslog']['listen_address'] }}"
+            format = "{{ prometheus_exporter_nginxlog_namespace['source']['syslog']['format'] | default('auto') }}"
+{% if prometheus_exporter_nginxlog_namespace['source']['syslog']['tags'] is defined %}
+            tags = [{{ prometheus_exporter_nginxlog_namespace['source']['syslog']['tags'] | map('to_json') | join(", ") }}]
+{% endif %}
+        }
+    }
+{% endif %}
+    print_log = false
+    labels {
+{% for prometheus_exporter_nginxlog_namespace_label in prometheus_exporter_nginxlog_namespace['labels'] %}
+        "{{ prometheus_exporter_nginxlog_namespace_label }}" = "{{ prometheus_exporter_nginxlog_namespace['labels'][prometheus_exporter_nginxlog_namespace_label] }}"
+{% endfor %}
+    }
+}
+
+{% endfor %}

@@ -1,0 +1,46 @@
+- name: "exporter selenium no-version create selenium group"
+  group:
+    name: selenium
+    gid: 136
+
+- name: "exporter selenium no-version create selenium user"
+  user:
+    name: selenium
+    uid: 136
+    shell: /bin/bash
+    groups:
+      - selenium
+      - prometheus-exporter
+    append: True
+    password_lock: True
+
+- name: "exporter selenium no-version add ssh keys to selenium user"
+  authorized_key:
+    user: selenium
+    key: "{{ prometheus_exporter_selenium_access_user['key'] }}"
+    state: "{{ prometheus_exporter_selenium_access_user['state'] }}"
+  with_items: "{{ prometheus_exporter_selenium_access_users }}"
+  loop_control:
+    loop_var: prometheus_exporter_selenium_access_user
+
+- name: "exporter selenium no-version include nvm role"
+  import_role:
+    name: blunix_role-nvm_1.0.2
+  vars:
+    nvm_user: selenium
+    nvm_group: selenium
+    nvm_user_home: /home/selenium
+    nvm_version: v0.35.3
+    nvm_nodejs_version: 12.18.3
+    nvm_nodejs_default_version: "{{ nvm_nodejs_version }}"
+    nvm_npm_packages_installed:
+      - "selenium-side-runner"
+
+- name: "exporter selenium no-version include docker role"
+  import_role:
+    name: blunix_role-docker_1.2.1
+  vars:
+    docker_compose_enabled: True
+    docker_compose_version: 1.26.2
+    docker_group_users:
+      - selenium

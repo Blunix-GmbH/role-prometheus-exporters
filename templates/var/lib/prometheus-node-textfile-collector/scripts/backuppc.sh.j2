@@ -1,0 +1,32 @@
+#!/bin/bash
+#
+# Check if backuppc backups for all active hosts are not older than 32 hours
+
+
+echo "# HELP backuppc is there a successful recent backup for a given backuppc host"
+echo "# TYPE backuppc gauge"
+
+{% for prometheus_exporter_node_textfile_host in groups['all'] %}
+# Check if the host is configured in backuppc
+backuppc_client_host="{{ prometheus_exporter_node_textfile_host }}"
+if grep $backuppc_client_host /etc/backuppc/hosts 2>&1 >/dev/null; then
+    # Skip if the host is manually disabled
+    if [ ! -f /etc/backuppc/${backuppc_client_host}.pl ] || ! grep BackupsDisable /etc/backuppc/${backuppc_client_host}.pl 2>&1 >/dev/null; then
+        # Check if there is any directory younger than 1.5 days
+        if find /var/lib/backuppc/pc/$backuppc_client_host/* -maxdepth 0 -type d -mmin -1920 | grep . 2>&1 >/dev/null; then
+            # Check if this backup was either a successful (full or incremental and not only a partial) backup
+            latest_backup="$(find /var/lib/backuppc/pc/$backuppc_client_host/* -maxdepth 0 -type d -mmin -1920 | tail -n 1)"
+            if [ -f ${latest_backup}/backupInfo ] && \
+                egrep 'incr|full' ${latest_backup}/backupInfo 2>&1 >/dev/null; then
+                echo "backuppc{host=\"${backuppc_client_host}\"} 1"
+            else
+                echo "backuppc{host=\"${backuppc_client_host}\"} 0"
+            fi
+        # No directory younger than 1,5 days found
+        else
+            echo "backuppc{host=\"${backuppc_client_host}\"} 0"
+        fi
+    fi
+fi
+
+{% endfor %}

@@ -1,0 +1,149 @@
+---
+- name: Converge
+  hosts: all
+  become: True
+  roles:
+    - role: role-prometheus-exporters
+  vars:
+
+
+    # Available exporters: https://prometheus.io/docs/instrumenting/exporters/
+    prometheus_exporters:
+
+        # name of this exporter (for the binary and systemd service)
+      - name: node
+        # how to setup this exporter
+        task_template: default
+        # version of this exporter (required for directory structure)
+        version: 1.0.1
+        # url to the tar.gz
+        url: "https://github.com/prometheus/node_exporter/releases/download/v1.0.1/node_exporter-1.0.1.linux-amd64.tar.gz"
+        # user and group for directories and systemd service
+        # default user and group: prometheus_exporter
+        user: root
+        group: root
+        # state: present or absent, default: present
+        state: present
+        # arguments for the binary in the systemd service file
+        systemd_service_arguments: |
+          --log.level=info \
+          --web.listen-address="127.0.0.1:9100" \
+          --web.max-requests="1" \
+          --collector.disable-defaults \
+          --collector.arp \
+          --collector.bcache \
+          --collector.conntrack \
+          --collector.cpu \
+          --collector.cpufreq \
+          --collector.diskstats \
+          --collector.entropy \
+          --collector.filesystem \
+          --collector.hwmon \
+          --collector.interrupts \
+          --collector.loadavg \
+          --collector.logind \
+          --collector.meminfo \
+          --collector.mountstats \
+          --collector.netclass \
+          --collector.netdev \
+          --collector.netstat \
+          --collector.nfs \
+          --collector.nfsd \
+          --collector.ntp \
+          --collector.ntp.server="127.0.0.1" \
+          --collector.ntp.protocol-version=4 \
+          --collector.processes \
+          --collector.systemd \
+          --collector.systemd.enable-task-metrics \
+          --collector.systemd.enable-restarts-metrics \
+          --collector.systemd.enable-start-time-metrics \
+          --collector.textfile.directory /var/lib/prometheus-textfile-collector \
+          --collector.time \
+          --collector.udp_queues \
+          --collector.uname \
+          --collector.vmstat
+
+      - name: blackbox
+        version: 0.17.0
+        url: "https://github.com/prometheus/blackbox_exporter/releases/download/v0.17.0/blackbox_exporter-0.17.0.linux-amd64.tar.gz"
+        task_template: default
+        systemd_service_arguments: |
+          --config.file="/etc/prometheus-exporters/blackbox/config.yml" \
+          --log.level=info \
+          --web.listen-address="127.0.0.1:9115"
+        # Example config: https://github.com/prometheus/blackbox_exporter/blob/master/example.yml
+        # Format here is text not yaml!
+        config: |
+          modules:
+            duckduckgo:
+              prober: http
+              timeout: 5s
+              http:
+                valid_http_versions:
+                  - "HTTP/1.1"
+                  - "HTTP/2.0"
+                method: GET
+                headers:
+                  Accept-Language: en-US
+                no_follow_redirects: false
+                fail_if_not_ssl: true
+
+
+      # - name: wireguard
+      #   task_template: default
+      #   version: 3.3.2
+      #   url: "https://github.com/MindFlavor/prometheus_wireguard_exporter/archive/3.3.2.tar.gz"
+      #
+      # - name: absent_exporter
+      #   state: absent
+
+
+
+
+      # - name: memcached
+      #   version: 0.7.0
+      #   url: "https://github.com/prometheus/memcached_exporter/releases/download/v0.7.0/memcached_exporter-0.7.0.linux-amd64.tar.gz"
+      #
+      # - name: postgres
+      #   version: 0.1.0
+      #   # url: "https://github.com/wrouesnel/postgres_exporter/releases/download/v0.8.0/postgres_exporter_v0.8.0_linux-amd64.tar.gz"
+      #   url: "https://github.com/percona/proxysql_exporter/releases/download/v1.1.0/proxysql_exporter-1.1.0.linux-amd64.tar.gz"
+      #
+      # - name: rabbitmq
+      #   version: 1.0.0
+      #   url: "https://github.com/kbudde/rabbitmq_exporter/archive/v1.0.0-RC7.1.tar.gz"
+      #
+      # - name: redis
+      #   version: 1.9.0
+      #   url: "https://github.com/oliver006/redis_exporter/releases/download/v1.9.0/redis_exporter-v1.9.0.linux-amd64.tar.gz"
+      #
+      # - name: mysqld
+      #   version: 0.12.1
+      #   url: "https://github.com/prometheus/mysqld_exporter/releases/download/v0.12.1/mysqld_exporter-0.12.1.linux-amd64.tar.gz"
+      #   # user: mysql
+      #   # group: mysql
+      #
+      #   # haproxy setup: https://github.com/prometheus/haproxy_exporter
+      # - name: haproxy
+      #   version: 0.11.0
+      #   url: "https://github.com/prometheus/haproxy_exporter/releases/download/v0.11.0/haproxy_exporter-0.11.0.linux-amd64.tar.gz"
+      #   # user: haproxy
+      #   # group: haproxy
+      #
+      #   # apache2 setup: https://github.com/Lusitaniae/apache_exporter
+      # - name: apache
+      #   version: 0.8.0
+      #   url: "https://github.com/Lusitaniae/apache_exporter/releases/download/v0.8.0/apache_exporter-0.8.0.linux-amd64.tar.gz"
+      #   # user: www-data
+      #   # group: www-data
+      #
+      #  # nginx setup: https://github.com/knyar/nginx-lua-prometheus
+      # - name: nginx
+      #   version: 0.20200523
+      #   url: "https://github.com/knyar/nginx-lua-prometheus/archive/0.20200523.tar.gz"
+      #  # user: www-data
+      #  # group: www-data
+      #
+      # - name: php-fpm
+      #   version: 0.6.1
+      #   url: "https://github.com/bakins/php-fpm-exporter/releases/download/v0.6.1/php-fpm-exporter.linux.amd64"

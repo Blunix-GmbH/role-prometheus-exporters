@@ -1,0 +1,132 @@
+- name: "exporter node-textfile {{ prometheus_exporter_node_version }} install apt requirements"
+  apt:
+    name: moreutils
+    state: present
+
+- name: "exporter node-textfile {{ prometheus_exporter_node_version }} create scripts directory"
+  file:
+    state: directory
+    path: "/var/lib/prometheus-node-textfile-collector/scripts"
+    owner: "prometheus-exporter"
+    group: "prometheus-exporter"
+    mode: 0750
+
+- name: "exporter node-textfile {{ prometheus_exporter_node_version }} create logs directory"
+  file:
+    state: directory
+    path: "/var/lib/prometheus-node-textfile-collector/logs"
+    owner: "prometheus-exporter"
+    group: "prometheus-exporter"
+    mode: 0770
+
+
+
+- name: "exporter node-textfile {{ prometheus_exporter_node_version }} setup scripts from urls"
+  get_url:
+    url: "{{ prometheus_exporter_node_textfile_download['src'] }}"
+    dest: "/var/lib/prometheus-node-textfile-collector/scripts/{{ prometheus_exporter_node_textfile_download['name'] }}"
+    owner: "{{ prometheus_exporter_node_textfile_download['user'] | default('prometheus-exporter') }}"
+    group: "{{ prometheus_exporter_node_textfile_download['user'] | default('prometheus-exporter') }}"
+    mode: 0750
+  with_items: "{{ prometheus_exporter_node_textfile_downloads }}"
+  loop_control:
+    loop_var: prometheus_exporter_node_textfile_download
+  when: prometheus_exporter_node_textfile_downloads is defined and prometheus_exporter_node_textfile_download['state'] | default('present') != 'absent'
+
+- name: "exporter node-textfile {{ prometheus_exporter_node_version }} setup cronjob for scripts from urls"
+  cron:
+    name: "prometheus_node_textfile_collector_{{ prometheus_exporter_node_textfile_download['name'] }}"
+    cron_file: "prometheus_node_textfile_collector_{{ prometheus_exporter_node_textfile_download['name'] | replace('.', '_') | replace('-', '_') }}"
+    user: "{{ prometheus_exporter_node_textfile_download['user'] | default('prometheus-exporter') }}"
+    job: "bash -c '/usr/bin/prom-cron prometheus_node_textfile_collector_{{ prometheus_exporter_node_textfile_download['name'] }} /var/lib/prometheus-node-textfile-collector/scripts/{{ prometheus_exporter_node_textfile_download['name'] }} | sponge /var/lib/prometheus-node-textfile-collector/logs/{{ prometheus_exporter_node_textfile_download['name'] }}.prom'"
+    minute: "{{ prometheus_exporter_node_textfile_download['cron']['minute'] | default('*') }}"
+    hour: "{{ prometheus_exporter_node_textfile_download['cron']['hour'] | default('*') }}"
+    day: "{{ prometheus_exporter_node_textfile_download['cron']['day'] | default('*') }}"
+    weekday: "{{ prometheus_exporter_node_textfile_download['cron']['weekday'] | default('*') }}"
+    month: "{{ prometheus_exporter_node_textfile_download['cron']['month'] | default('*') }}"
+  with_items: "{{ prometheus_exporter_node_textfile_downloads }}"
+  loop_control:
+    loop_var: prometheus_exporter_node_textfile_download
+  when: prometheus_exporter_node_textfile_downloads is defined and prometheus_exporter_node_textfile_download['state'] | default('present') != 'absent'
+
+- name: "exporter node-textfile {{ prometheus_exporter_node_version }} remove scripts from urls when state is absent"
+  file:
+    state: absent
+    path: "/var/lib/prometheus-node-textfile-collector/scripts/{{ prometheus_exporter_node_textfile_download['name'] }}"
+  with_items: "{{ prometheus_exporter_node_textfile_downloads }}"
+  loop_control:
+    loop_var: prometheus_exporter_node_textfile_download
+  when: prometheus_exporter_node_textfile_downloads is defined and prometheus_exporter_node_textfile_download['state'] | default('present') == 'absent'
+
+- name: "exporter node-textfile {{ prometheus_exporter_node_version }} remove cronjob for scripts from urls when state is absent"
+  cron:
+    name: "prometheus_node_textfile_collector_{{ prometheus_exporter_node_textfile_download['name'] }}"
+    cron_file: "prometheus_node_textfile_collector_{{ prometheus_exporter_node_textfile_download['name'] | replace('.', '_') | replace('-', '_') }}"
+    state: absent
+  with_items: "{{ prometheus_exporter_node_textfile_downloads }}"
+  loop_control:
+    loop_var: prometheus_exporter_node_textfile_download
+  when: prometheus_exporter_node_textfile_downloads is defined and prometheus_exporter_node_textfile_download['state'] | default('present') == 'absent'
+
+
+
+- name: "exporter node-textfile {{ prometheus_exporter_node_version }} setup scripts from local templates"
+  template:
+    src: "{{ prometheus_exporter_node_textfile_template['src'] }}"
+    dest: "/var/lib/prometheus-node-textfile-collector/scripts/{{ prometheus_exporter_node_textfile_template['name'] }}"
+    owner: "{{ prometheus_exporter_node_textfile_template['user'] | default('prometheus-exporter') }}"
+    group: "{{ prometheus_exporter_node_textfile_template['user'] | default('prometheus-exporter') }}"
+    mode: 0750
+  with_items: "{{ prometheus_exporter_node_textfile_templates }}"
+  loop_control:
+    loop_var: prometheus_exporter_node_textfile_template
+  when: prometheus_exporter_node_textfile_templates is defined and prometheus_exporter_node_textfile_template['state'] | default('present') != 'absent'
+
+- name: "exporter node-textfile {{ prometheus_exporter_node_version }} setup cronjob for scripts from local templates"
+  cron:
+    name: "prometheus_node_textfile_collector_{{ prometheus_exporter_node_textfile_template['name'] }}"
+    cron_file: "prometheus_node_textfile_collector_{{ prometheus_exporter_node_textfile_template['name'] | replace('.', '_') | replace('-', '_') }}"
+    user: "{{ prometheus_exporter_node_textfile_template['user'] | default('prometheus-exporter') }}"
+    job: "bash -c '/usr/bin/prom-cron prometheus_node_textfile_collector_{{ prometheus_exporter_node_textfile_template['name'] }} /var/lib/prometheus-node-textfile-collector/scripts/{{ prometheus_exporter_node_textfile_template['name'] }} | sponge /var/lib/prometheus-node-textfile-collector/logs/{{ prometheus_exporter_node_textfile_template['name'] }}.prom'"
+    minute: "{{ prometheus_exporter_node_textfile_template['cron']['minute'] | default('*') }}"
+    hour: "{{ prometheus_exporter_node_textfile_template['cron']['hour'] | default('*') }}"
+    day: "{{ prometheus_exporter_node_textfile_template['cron']['day'] | default('*') }}"
+    weekday: "{{ prometheus_exporter_node_textfile_template['cron']['weekday'] | default('*') }}"
+    month: "{{ prometheus_exporter_node_textfile_template['cron']['month'] | default('*') }}"
+  with_items: "{{ prometheus_exporter_node_textfile_templates }}"
+  loop_control:
+    loop_var: prometheus_exporter_node_textfile_template
+  when: prometheus_exporter_node_textfile_templates is defined and prometheus_exporter_node_textfile_template['state'] | default('present') != 'absent'
+
+- name: "exporter node-textfile {{ prometheus_exporter_node_version }} remove scripts from local templates when state is absent"
+  file:
+    state: absent
+    path: "/var/lib/prometheus-node-textfile-collector/scripts/{{ prometheus_exporter_node_textfile_template['name'] }}"
+  with_items: "{{ prometheus_exporter_node_textfile_templates }}"
+  loop_control:
+    loop_var: prometheus_exporter_node_textfile_template
+  when: prometheus_exporter_node_textfile_templates is defined and prometheus_exporter_node_textfile_template['state'] | default('present') == 'absent'
+
+- name: "exporter node-textfile {{ prometheus_exporter_node_version }} remove cronjob for scripts from local templates when state is absent"
+  cron:
+    name: "prometheus_node_textfile_collector_{{ prometheus_exporter_node_textfile_template['name'] }}"
+    cron_file: "prometheus_node_textfile_collector_{{ prometheus_exporter_node_textfile_template['name'] | replace('.', '_') | replace('-', '_') }}"
+    state: absent
+  with_items: "{{ prometheus_exporter_node_textfile_templates }}"
+  loop_control:
+    loop_var: prometheus_exporter_node_textfile_template
+  when: prometheus_exporter_node_textfile_templates is defined and prometheus_exporter_node_textfile_template['state'] | default('present') == 'absent'
+
+
+- name: "exporter node-textfile {{ prometheus_exporter_node_version }} install apt requirements"
+  apt:
+    name: time
+    state: present
+
+- name: "exporter node-textfile {{ prometheus_exporter_node_version }} template prom-cron.sh script"
+  template:
+    src: "templates/var/lib/prometheus-node-textfile-collector/scripts/prom-cron.sh.j2"
+    dest: "/usr/bin/prom-cron"
+    owner: root
+    group: root
+    mode: 0755

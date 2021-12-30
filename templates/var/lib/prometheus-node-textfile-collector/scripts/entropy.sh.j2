@@ -1,0 +1,13 @@
+#!/bin/bash
+#
+# Export metrics about system entropy
+
+
+
+echo "# HELP entropy_poolsize maximum possible entropy"
+echo "# TYPE entropy_poolsize gauge"
+echo "entropy_poolsize $(cat /proc/sys/kernel/random/poolsize)"
+
+echo "# HELP entropy_avail entropy available"
+echo "# TYPE entropy_avail gauge"
+echo "entropy_avail $(cat /proc/sys/kernel/random/entropy_avail)"

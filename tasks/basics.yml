@@ -1,0 +1,43 @@
+- name: "exporter basics install archive extract tools"
+  apt:
+    state: present
+    name:
+      - unzip
+
+- name: "exporter basics create group for unprivileged monitoring tasks"
+  group:
+    name: prometheus-exporter
+    gid: 135
+
+- name: "exporter basics create user for unprivileged monitoring tasks"
+  user:
+    name: prometheus-exporter
+    group: prometheus-exporter
+    append: False
+    home: /nonexistent
+    uid: 135
+    shell: /usr/sbin/nologin
+
+- name: "exporter basics create exporters directories"
+  file:
+    state: directory
+    path: "{{ prometheus_exporters_directory }}"
+    owner: "prometheus-exporter"
+    group: "prometheus-exporter"
+    mode: 0755
+  with_items:
+    - "/etc/prometheus-exporters/"
+    - "/usr/local/src/prometheus-exporters/"
+  loop_control:
+    loop_var: prometheus_exporters_directory
+
+- name: "exporter basics install python3-pip"
+  apt:
+    name: python3-pip
+    state: present
+
+- name: "exporter basics install python3 pip3 requirements"
+  pip:
+    name: "{{ prometheus_exporters_python3_pip3_packages }}"
+    executable: /usr/bin/pip3
+    state: present

@@ -1,0 +1,83 @@
+- name: "exporter {{ prometheus_exporter_default_name }} {{ prometheus_exporter_default_version }} create source directory"
+  file:
+    state: directory
+    path: "{{ prometheus_exporter_directory }}"
+    owner: "{{ prometheus_exporter_default_user }}"
+    group: "{{ prometheus_exporter_default_group }}"
+    mode: 0750
+  with_items:
+    - "/usr/local/src/prometheus-exporters/{{ prometheus_exporter_default_name }}/{{ prometheus_exporter_default_version }}"
+    - "/etc/prometheus-exporters/{{ prometheus_exporter_default_name }}/"
+  loop_control:
+    loop_var: prometheus_exporter_directory
+
+- name: "exporter {{ prometheus_exporter_default_name }} {{ prometheus_exporter_default_version }} create config file if defined"
+  copy:
+    dest: "/etc/prometheus-exporters/{{ prometheus_exporter_default_name }}/config.yml"
+    owner: "{{ prometheus_exporter_default_user }}"
+    group: "{{ prometheus_exporter_default_group }}"
+    mode: 0640
+    content: "{{ prometheus_exporter_default_config }}"
+  when: prometheus_exporter_default_config is defined
+
+- name: "exporter {{ prometheus_exporter_default_name }} {{ prometheus_exporter_default_version }} create env.conf file if defined"
+  copy:
+    dest: "/etc/prometheus-exporters/{{ prometheus_exporter_default_name }}/env.conf"
+    owner: "{{ prometheus_exporter_default_user }}"
+    group: "{{ prometheus_exporter_default_group }}"
+    mode: 0640
+    content: "{{ prometheus_exporter_default_env }}"
+  when: prometheus_exporter_default_env is defined
+
+- name: "exporter {{ prometheus_exporter_default_name }} {{ prometheus_exporter_default_version }} check if exporter was already downloaded"
+  stat:
+    path: "/usr/local/src/prometheus-exporters/{{ prometheus_exporter_default_name }}/{{ prometheus_exporter_default_version }}/{{ prometheus_exporter_default_name }}-{{ prometheus_exporter_default_version }}.linux-amd64.tar.gz"
+  register: prometheus_exporter_downloaded
+
+- name: "exporter {{ prometheus_exporter_default_name }} {{ prometheus_exporter_default_version }} download and unpack archive"
+  unarchive:
+    src: "{{ prometheus_exporter_default_url }}"
+    dest: "/usr/local/src/prometheus-exporters/{{ prometheus_exporter_default_name }}/{{ prometheus_exporter_default_version }}/"
+    remote_src: True
+    owner: "{{ prometheus_exporter_default_user }}"
+    group: "{{ prometheus_exporter_default_group }}"
+  when: prometheus_exporter_downloaded.stat.exists | default(False) != True
+  register: prometheus_exporter_unpack_status
+  notify: "restart prometheus exporter {{ prometheus_exporter_default_name }}"
+
+- name: "exporter {{ prometheus_exporter_default_name }} {{ prometheus_exporter_default_version }} remove previous symlink if exists"
+  file:
+    state: absent
+    path: "/usr/local/bin/prometheus_{{ prometheus_exporter_default_name }}_exporter"
+  when: prometheus_exporter_unpack_status.changed
+
+- name: "exporter {{ prometheus_exporter_default_name }} {{ prometheus_exporter_default_version }} symlink binary"
+  file:
+    state: link
+    src: "/usr/local/src/prometheus-exporters/{{ prometheus_exporter_default_name }}/{{ prometheus_exporter_default_version }}/{{ prometheus_exporter_default_archive_name | default(prometheus_exporter_default_name + '_exporter-' + prometheus_exporter_default_version + '.linux-amd64') }}/{{ prometheus_exporter_default_name }}_exporter"
+    dest: "/usr/local/bin/prometheus_{{ prometheus_exporter_default_name }}_exporter"
+    owner: "{{ prometheus_exporter_default_user }}"
+    group: "{{ prometheus_exporter_default_group }}"
+  notify: "restart prometheus exporter {{ prometheus_exporter_default_name }}"
+  register: prometheus_exporter_symlink_status
+
+- name: "exporter {{ prometheus_exporter_default_name }} {{ prometheus_exporter_default_version }} template systemd service"
+  template:
+    src: templates/etc/systemd/system/prometheus-exporter.service.j2
+    dest: "/etc/systemd/system/prometheus-{{ prometheus_exporter_default_name }}-exporter.service"
+    owner: "root"
+    group: "root"
+    mode: 0644
+  register: prometheus_exporter_systemd_status
+  notify:
+    - reload systemd daemon
+    - "restart prometheus exporter {{ prometheus_exporter_default_name }}"
+
+# TODO good way to export changed exporters to handlers?
+- name: "exporter {{ prometheus_exporter_default_name }} {{ prometheus_exporter_default_version }} restart systemd service"
+  systemd:
+    daemon_reload: True
+    name: "prometheus-{{ prometheus_exporter_default_name }}-exporter"
+    state: restarted
+    enabled: True
+  when: prometheus_exporter_unpack_status.changed or prometheus_exporter_symlink_status.changed or prometheus_exporter_systemd_status.changed

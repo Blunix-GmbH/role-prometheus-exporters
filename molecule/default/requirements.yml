@@ -1,0 +1,9 @@
+- src: git@git.blu.pm:ansible/role-nvm.git
+  name: blunix_role-nvm_1.0.2
+  scm: git
+  version: 1.0.2
+
+- src: git@git.blu.pm:ansible/role-docker.git
+  name: blunix_role-docker_1.2.1
+  scm: git
+  version: 1.2.1

@@ -1,0 +1,26 @@
+#!/bin/bash
+#
+# export smtpdctl show stats
+
+
+smtpctl show status | while read line; do
+    service=$(echo $line | cut -d ' ' -f 1)
+    status_name=$(echo $line | cut -d ' ' -f 2)
+    if [[ "$status_name" == "running" ]]; then
+        status=1
+    else
+        status=0
+    fi
+    echo "# HELP $service opensmtpd status"
+    echo "# TYPE $service gauge"
+    echo "$service $status"
+done
+
+smtpctl show stats | while read line; do
+    name=$(echo $line | cut -d '=' -f 1 | sed 's/\./_/g')
+    value=$(echo $line | cut -d '=' -f 2)
+    [[ "$name" == "uptime_human" ]] && continue
+    echo "# HELP $name opensmtpd stats"
+    echo "# TYPE $name gauge"
+    echo "$name $value"
+done

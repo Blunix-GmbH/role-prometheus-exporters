@@ -13,7 +13,7 @@ smtpctl show status | while read line; do
     fi
     echo "# HELP $service opensmtpd status"
     echo "# TYPE $service gauge"
-    echo "$service $status"
+    echo "opensmtpd_service_$service $status"
 done
 
 smtpctl show stats | while read line; do
@@ -22,5 +22,5 @@ smtpctl show stats | while read line; do
     [[ "$name" == "uptime_human" ]] && continue
     echo "# HELP $name opensmtpd stats"
     echo "# TYPE $name gauge"
-    echo "$name $value"
+    echo "opensmtpd_stat_$name $value"
 done

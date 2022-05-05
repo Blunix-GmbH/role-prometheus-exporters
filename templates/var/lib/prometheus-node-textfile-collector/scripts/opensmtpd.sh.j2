@@ -3,7 +3,7 @@
 # export smtpdctl show stats
 
 
-smtpctl show status | while read line; do
+/usr/sbin/smtpctl show status | while read line; do
     service=$(echo $line | cut -d ' ' -f 1 | tr '[:upper:]' '[:lower:]')
     status_name=$(echo $line | cut -d ' ' -f 2)
     if [[ "$status_name" == "running" ]]; then
@@ -16,7 +16,7 @@ smtpctl show status | while read line; do
     echo "opensmtpd_service_$service $status"
 done
 
-smtpctl show stats | while read line; do
+/usr/sbin/smtpctl show stats | while read line; do
     name=$(echo $line | cut -d '=' -f 1 | sed 's/\./_/g')
     value=$(echo $line | cut -d '=' -f 2)
     [[ "$name" == "uptime_human" ]] && continue

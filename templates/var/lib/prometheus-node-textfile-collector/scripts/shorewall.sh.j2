@@ -10,3 +10,11 @@ if /sbin/shorewall status | grep running 2>&1 >/dev/null; then
 else
     echo "shorewall_running 0"
 fi
+
+echo "# HELP shorewall6_running checks if shorewall6 is running"
+echo "# TYPE shorewall6_running gauge"
+if /sbin/shorewall6 status | grep running 2>&1 >/dev/null; then
+    echo "shorewall6_running 1"
+else
+    echo "shorewall6_running 0"
+fi

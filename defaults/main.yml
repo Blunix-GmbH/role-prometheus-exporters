@@ -169,6 +169,7 @@ prometheus_exporter_node_textfile_templates_defaults:
     src: "templates/var/lib/prometheus-node-textfile-collector/scripts/dnscrypt-proxy.sh.j2"
   - name: opensmtpd.sh
     src: "templates/var/lib/prometheus-node-textfile-collector/scripts/opensmtpd.sh.j2"
+    user: root
   - name: open-files.sh
     src: "templates/var/lib/prometheus-node-textfile-collector/scripts/open-files.sh.j2"
     user: root

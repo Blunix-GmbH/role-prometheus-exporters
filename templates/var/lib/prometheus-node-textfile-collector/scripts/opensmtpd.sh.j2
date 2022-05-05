@@ -4,7 +4,7 @@
 
 
 smtpctl show status | while read line; do
-    service=$(echo $line | cut -d ' ' -f 1)
+    service=$(echo $line | cut -d ' ' -f 1 | tr '[:upper:]' '[:lower:]')
     status_name=$(echo $line | cut -d ' ' -f 2)
     if [[ "$status_name" == "running" ]]; then
         status=1

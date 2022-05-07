@@ -5,4 +5,4 @@
 
 echo "# HELP system_priority defines the priority of a server instance"
 echo "# TYPE system_priority gauge"
-echo "system_priority $(cat /var/lib/prometheus-node-textfile-collector/logs/system-priority.prom)"
+echo "system_priority {{ prometheus_exporter_node_textfile_system_priority }}"

@@ -20,7 +20,7 @@ done
 # Process /etc/cron.d
 for crond_job in $(find /etc/cron.d/ -type f | grep -v placeholder); do
     # Exclude some jobs setup by apt packages
-    [[ "$crond_job" == "/etc/cron.d/atop" || "$crond_job" == "/etc/cron.d/php" || "$crond_job" == "/etc/cron.d/mdadm" ]] && continue
+    [[ "$crond_job" == "/etc/cron.d/atop" || "$crond_job" == "/etc/cron.d/php" || "$crond_job" == "/etc/cron.d/mdadm" || "$crond_job" == "e2scrub_all" ]] && continue
     # Exclude already monitored jobs
     grep "/usr/bin/prom-cron" $crond_job 2>&1 >/dev/null && continue
     # Add unmonitored job

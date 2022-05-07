@@ -20,21 +20,22 @@ done
 # Process /etc/cron.d
 for crond_job in $(find /etc/cron.d/ -type f | grep -v placeholder); do
     # Exclude some jobs setup by apt packages
-    [[ "$crond_job" == "/etc/cron.d/atop" || "$crond_job" == "/etc/cron.d/php" ]] && continue
+    [[ "$crond_job" == "/etc/cron.d/atop" || "$crond_job" == "/etc/cron.d/php" || "$crond_job" == "/etc/cron.d/mdadm" ]] && continue
     # Exclude already monitored jobs
     grep "/usr/bin/prom-cron" $crond_job 2>&1 >/dev/null && continue
     # Add unmonitored job
-    grep -v '^#' $crond_job | while read line; do
+    while read -r line; do
         crond_user="$(echo $line | cut -d ' ' -f 6 | sed '/^$/d')"
-        (( unmonitored_cronjobs[$crond_user]++ ))
-    done
+        current_jobs=${unmonitored_cronjobs["$crond_user"]:=0}
+        let unmonitored_cronjobs[$crond_user]=$current_jobs+1
+    done < <(grep -v '^#' $crond_job)
 done
 
 
 # Print results
 echo "# HELP cron_unmonitored number of cronjobs not executed with /usr/bin/prom-cron"
 echo "# TYPE cron_unmonitored gauge"
-if [ ${{ '{#' }}unmonitored_cronjobs[@]} -eq 0 ]; then
+if [ ${#unmonitored_cronjobs[@]} -eq 0 ]; then
     echo "cron_unmonitored{user=\"all_users\"} 0"
 else
     for unmonitored_cron_user in "${!unmonitored_cronjobs[@]}"; do

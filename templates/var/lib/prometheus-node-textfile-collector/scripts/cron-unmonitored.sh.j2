@@ -3,7 +3,6 @@
 # Find cronjobs which are not monitored by /usr/bin/prom-cron
 
 
-
 declare -A unmonitored_cronjobs
 
 # Process users crontabs
@@ -25,15 +24,17 @@ for crond_job in $(find /etc/cron.d/ -type f | grep -v placeholder); do
     # Exclude already monitored jobs
     grep "/usr/bin/prom-cron" $crond_job 2>&1 >/dev/null && continue
     # Add unmonitored job
-    crond_user="$(cat $crond_job | cut -d ' ' -f 6 | sed '/^$/d')"
-    (( unmonitored_cronjobs[$crond_user]++ ))
+    grep -v '^#' $crond_job | while read line; do
+        crond_user="$(echo $line | cut -d ' ' -f 6 | sed '/^$/d')"
+        (( unmonitored_cronjobs[$crond_user]++ ))
+    done
 done
 
 
 # Print results
 echo "# HELP cron_unmonitored number of cronjobs not executed with /usr/bin/prom-cron"
 echo "# TYPE cron_unmonitored gauge"
-if [ ${{ '{#' }}unmonitored_cronjobs[@]} -eq 0 ]; then
+if [ ${#unmonitored_cronjobs[@]} -eq 0 ]; then
     echo "cron_unmonitored{user=\"all_users\"} 0"
 else
     for unmonitored_cron_user in "${!unmonitored_cronjobs[@]}"; do

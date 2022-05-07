@@ -130,3 +130,11 @@
     owner: root
     group: root
     mode: 0755
+
+- name: "exporter node-textfile {{ prometheus_exporter_node_version }} template /var/lib/prometheus-node-textfile-collector/logs/system-priority.prom"
+  copy:
+    user: root
+    group: root
+    mode: 0755
+    dest: /var/lib/prometheus-node-textfile-collector/logs/system-priority.prom
+    content: "{{ prometheus_exporter_node_textfile_system_priority }}"

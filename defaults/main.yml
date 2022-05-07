@@ -184,10 +184,15 @@ prometheus_exporter_node_textfile_templates_defaults:
   - name: shorewall.sh
     src: "templates/var/lib/prometheus-node-textfile-collector/scripts/shorewall.sh.j2"
     user: root
+  - name: system-priority.sh
+    src: "templates/var/lib/prometheus-node-textfile-collector/scripts/system-priority.sh.j2"
+    user: root
 prometheus_exporter_node_textfile_templates_custom: []
 prometheus_exporter_node_textfile_templates: "{{ prometheus_exporter_node_textfile_templates_defaults + prometheus_exporter_node_textfile_templates_custom }}"
 prometheus_exporter_node_textfile_ssl_certs:
   - "/etc/letsencrypt/live/{{ inventory_hostname }}/fullchain.pem"
+# See https://git.blunix.com/ansible-roles/role-prometheus-server/-/blob/master/README.md section "Incident priorities"
+prometheus_exporter_node_textfile_system_priority: "3"
 
 prometheus_exporter_selenium: False
 prometheus_exporter_selenium_access_users: []

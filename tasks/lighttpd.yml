@@ -45,6 +45,17 @@
     mode: 0640
   notify: restart lighttpd
 
+- name: template /etc/lighttpd/lighttpd.conf
+  template:
+    src: templates/usr/lib/systemd/system/lighttpd.service.j2
+    dest: /usr/lib/systemd/system/lighttpd.service
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - reload systemd daemon
+    - restart lighttpd
+
 - name: template prometheus exporter proxy vhost
   template:
     src: templates/etc/lighttpd/conf-enabled/99-prometheus-exporters.conf.j2

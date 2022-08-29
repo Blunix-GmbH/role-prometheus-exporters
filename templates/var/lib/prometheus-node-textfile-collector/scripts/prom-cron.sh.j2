@@ -14,7 +14,7 @@ if [[ "$#" -lt "2" ]]; then
 fi
 
 # Variables
-textfile_collector_dir="/var/lib/prometheus-node-textfile-collector/logs/"
+cronjob_textfile_collector_dir="/var/lib/prometheus-node-textfile-collector-cron/"
 cronjob_name="$1"
 
 
@@ -61,4 +61,4 @@ echo "# TYPE cronjob_exit gauge"
 echo "cronjob_exit{name=\"$cronjob_name\"} $cronjob_exit"
 
 # Move temp file to prometheus status
-mv $cron_temp_out ${textfile_collector_dir}/cronjob_${cronjob_name}.prom
+mv $cron_temp_out ${cronjob_textfile_collector_dir}/cronjob_${cronjob_name}.prom

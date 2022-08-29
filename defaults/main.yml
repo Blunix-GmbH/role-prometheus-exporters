@@ -187,6 +187,9 @@ prometheus_exporter_node_textfile_templates_defaults:
   - name: system-priority.sh
     src: "templates/var/lib/prometheus-node-textfile-collector/scripts/system-priority.sh.j2"
     user: root
+  - name: congregate-cronjob-logs.sh
+    src: "/templates/var/lib/prometheus-node-textfile-collector/scripts/congregate-cronjob-logs.sh.j2"
+    user: root
 prometheus_exporter_node_textfile_templates_custom: []
 prometheus_exporter_node_textfile_templates: "{{ prometheus_exporter_node_textfile_templates_defaults + prometheus_exporter_node_textfile_templates_custom }}"
 prometheus_exporter_node_textfile_ssl_certs:

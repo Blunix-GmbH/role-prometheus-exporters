@@ -19,6 +19,16 @@
     group: "prometheus-exporter"
     mode: 0770
 
+- name: "exporter node-textfile {{ prometheus_exporter_node_version }} create prom-cron logs directory"
+  file:
+    state: directory
+    path: "/var/lib/prometheus-node-textfile-collector-cron"
+    owner: "root"
+    group: "root"
+    mode: 0777
+
+
+
 
 
 - name: "exporter node-textfile {{ prometheus_exporter_node_version }} setup scripts from urls"
@@ -116,6 +126,7 @@
   loop_control:
     loop_var: prometheus_exporter_node_textfile_template
   when: prometheus_exporter_node_textfile_templates is defined and prometheus_exporter_node_textfile_template['state'] | default('present') == 'absent'
+
 
 
 - name: "exporter node-textfile {{ prometheus_exporter_node_version }} install apt requirements"

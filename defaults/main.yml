@@ -30,7 +30,7 @@ prometheus_exporters_ports:
 
 # Configure used exporters
 prometheus_exporter_node: True
-prometheus_exporter_node_version: 1.0.1
+prometheus_exporter_node_version: 1.3.1
 prometheus_exporter_node_url: "https://github.com/prometheus/node_exporter/releases/download/v{{ prometheus_exporter_node_version }}/node_exporter-{{ prometheus_exporter_node_version }}.linux-amd64.tar.gz"
 prometheus_exporter_node_user: root
 prometheus_exporter_node_group: root
@@ -75,7 +75,7 @@ prometheus_exporter_node_systemd_service_arguments: |
 
 
 prometheus_exporter_blackbox: False
-prometheus_exporter_blackbox_version: 0.17.0
+prometheus_exporter_blackbox_version: 0.22.0
 prometheus_exporter_blackbox_url: "https://github.com/prometheus/blackbox_exporter/releases/download/v{{ prometheus_exporter_blackbox_version }}/blackbox_exporter-{{ prometheus_exporter_blackbox_version }}.linux-amd64.tar.gz"
 prometheus_exporter_blackbox_user: prometheus-exporter
 prometheus_exporter_blackbox_group: prometheus-exporter
@@ -102,7 +102,7 @@ prometheus_exporter_blackbox_systemd_service_arguments: |
   --web.listen-address="127.0.0.1:10901"
 
 prometheus_exporter_uwsgi: False
-prometheus_exporter_uwsgi_version: 1.0.0
+prometheus_exporter_uwsgi_version: 1.1.0
 prometheus_exporter_uwsgi_url: "https://github.com/timonwong/uwsgi_exporter/releases/download/v{{ prometheus_exporter_uwsgi_version }}/uwsgi_exporter-{{ prometheus_exporter_uwsgi_version }}.linux-amd64.tar.gz"
 prometheus_exporter_uwsgi_user: root
 prometheus_exporter_uwsgi_group: root
@@ -113,7 +113,7 @@ prometheus_exporter_uwsgi_systemd_service_arguments: |
 
 
 prometheus_exporter_postgres: False
-prometheus_exporter_postgres_version: 0.8.0
+prometheus_exporter_postgres_version: 0.11.1
 prometheus_exporter_postgres_url: "https://github.com/wrouesnel/postgres_exporter/releases/download/v{{ prometheus_exporter_postgres_version }}/postgres_exporter_v{{ prometheus_exporter_postgres_version }}_linux-amd64.tar.gz"
 prometheus_exporter_postgres_user: postgres
 prometheus_exporter_postgres_group: postgres
@@ -130,7 +130,7 @@ prometheus_exporter_postgres_systemd_service_arguments: |
 
 
 prometheus_exporter_redis: False
-prometheus_exporter_redis_version: 1.10.0
+prometheus_exporter_redis_version: 1.44.0
 prometheus_exporter_redis_url: "https://github.com/oliver006/redis_exporter/releases/download/v{{ prometheus_exporter_redis_version }}/redis_exporter-v{{ prometheus_exporter_redis_version }}.linux-amd64.tar.gz"
 prometheus_exporter_redis_user: redis
 prometheus_exporter_redis_group: redis

@@ -30,7 +30,7 @@ prometheus_exporters_ports:
 
 # Configure used exporters
 prometheus_exporter_node: True
-prometheus_exporter_node_version: 1.3.1
+prometheus_exporter_node_version: 1.5.0
 prometheus_exporter_node_url: "https://github.com/prometheus/node_exporter/releases/download/v{{ prometheus_exporter_node_version }}/node_exporter-{{ prometheus_exporter_node_version }}.linux-amd64.tar.gz"
 prometheus_exporter_node_user: root
 prometheus_exporter_node_group: root
@@ -75,7 +75,7 @@ prometheus_exporter_node_systemd_service_arguments: |
 
 
 prometheus_exporter_blackbox: False
-prometheus_exporter_blackbox_version: 0.22.0
+prometheus_exporter_blackbox_version: 0.23.0
 prometheus_exporter_blackbox_url: "https://github.com/prometheus/blackbox_exporter/releases/download/v{{ prometheus_exporter_blackbox_version }}/blackbox_exporter-{{ prometheus_exporter_blackbox_version }}.linux-amd64.tar.gz"
 prometheus_exporter_blackbox_user: prometheus-exporter
 prometheus_exporter_blackbox_group: prometheus-exporter
@@ -130,7 +130,7 @@ prometheus_exporter_postgres_systemd_service_arguments: |
 
 
 prometheus_exporter_redis: False
-prometheus_exporter_redis_version: 1.44.0
+prometheus_exporter_redis_version: 1.45.0
 prometheus_exporter_redis_url: "https://github.com/oliver006/redis_exporter/releases/download/v{{ prometheus_exporter_redis_version }}/redis_exporter-v{{ prometheus_exporter_redis_version }}.linux-amd64.tar.gz"
 prometheus_exporter_redis_user: redis
 prometheus_exporter_redis_group: redis
@@ -224,7 +224,7 @@ prometheus_exporter_node_textfile_github_releases_custom: []
 prometheus_exporter_node_textfile_github_releases: "{{ prometheus_exporter_node_textfile_github_releases_defaults + prometheus_exporter_node_textfile_github_releases_custom }}"
 
 prometheus_exporter_nginxlog: False
-prometheus_exporter_nginxlog_version: 1.6.0
+prometheus_exporter_nginxlog_version: 1.10.0
 prometheus_exporter_nginxlog_url: "https://github.com/martin-helmich/prometheus-nginxlog-exporter/releases/download/v{{ prometheus_exporter_nginxlog_version }}/prometheus-nginxlog-exporter_{{ prometheus_exporter_nginxlog_version }}_linux_amd64.deb"
 prometheus_exporter_nginxlog_format_blunix: |
   "host=\"$host\" addr=\"$remote_addr\" user=\"$remote_user\" time=\"$time_local\" req=\"$request\" stat=\"$status\" bbs=\"$body_bytes_sent\" refe=\"$http_referer\" agnt=\"$http_user_agent\" rt=\"$request_time\" cc=\"$sent_http_cache_control\" uct=\"$upstream_connect_time\" uht=\"$upstream_header_time\" urt=\"$upstream_response_time\" port=\"$server_port\""

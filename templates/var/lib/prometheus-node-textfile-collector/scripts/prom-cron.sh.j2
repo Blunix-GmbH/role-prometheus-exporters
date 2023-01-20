@@ -44,20 +44,10 @@ cron_temp_out=$(mktemp)
 exec 2>&1 >$cron_temp_out
 
 # Print results for prometheus
-echo "# HELP cronjob_duration Elapsed real time used by the process, in seconds"
-echo "# TYPE cronjob_duration gauge"
+# HELP and TYPE can be omitted, as the results will be congregated by templates/var/lib/prometheus-node-textfile-collector/scripts/prom-cron.sh.j2
 echo "cronjob_duration{name=\"$cronjob_name\"} $cronjob_duration"
-
-echo "# HELP cronjob_memory Average total (data+stack+text) memory use of the process, in Kilobytes"
-echo "# TYPE cronjob_memory gauge"
 echo "cronjob_memory{name=\"$cronjob_name\"} $cronjob_memory"
-
-echo "# HELP cronjob_cpu Percentage of the CPU that this job got. This is just user + system times divided by the total running time. It also prints a percentage sign"
-echo "# TYPE cronjob_cpu gauge"
 echo "cronjob_cpu{name=\"$cronjob_name\"} $cronjob_cpu"
-
-echo "# HELP cronjob_exit Exit status of the command"
-echo "# TYPE cronjob_exit gauge"
 echo "cronjob_exit{name=\"$cronjob_name\"} $cronjob_exit"
 
 # Move temp file to prometheus status

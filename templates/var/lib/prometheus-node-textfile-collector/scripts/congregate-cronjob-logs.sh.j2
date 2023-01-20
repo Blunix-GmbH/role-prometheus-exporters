@@ -1,5 +1,31 @@
 #!/bin/bash
+#
+# Congregate all cronjob results
 
 
-cat /var/lib/prometheus-node-textfile-collector-cron/* > /var/lib/prometheus-node-textfile-collector/logs/cronjobs.prom 2>/dev/null
+exec 2>&1 > /var/lib/prometheus-node-textfile-collector/logs/cronjobs.prom
+
+if grep -q ^cronjob_duration /var/lib/prometheus-node-textfile-collector-cron/*; then
+    echo '# HELP cronjob_duration Elapsed real (wall clock) time used by the process, in seconds'
+    echo '# TYPE cronjob_duration gauge'
+    grep --no-filename ^cronjob_duration /var/lib/prometheus-node-textfile-collector-cron/*
+fi
+
+if grep -q ^cronjob_memory /var/lib/prometheus-node-textfile-collector-cron/*; then
+    echo '# HELP cronjob_memory Average total (data+stack+text) memory use of the process, in Kilobytes'
+    echo '# TYPE cronjob_memory gauge'
+    grep --no-filename ^cronjob_memory /var/lib/prometheus-node-textfile-collector-cron/*
+fi
+
+if grep -q ^cronjob_cpu /var/lib/prometheus-node-textfile-collector-cron/*; then
+    echo '# HELP cronjob_cpu Percentage of the CPU that this job got. This is just user + system times divided by the total running time. It also prints a percentage sign'
+    echo '# TYPE cronjob_cpu gauge'
+    grep --no-filename ^cronjob_cpu /var/lib/prometheus-node-textfile-collector-cron/*
+fi
+
+if grep -q ^cronjob_exit /var/lib/prometheus-node-textfile-collector-cron/*; then
+    echo "# HELP cronjob_exit Exit status of the command"
+    echo "# TYPE cronjob_exit gauge"
+    grep --no-filename ^cronjob_exit /var/lib/prometheus-node-textfile-collector-cron/*
+fi
 

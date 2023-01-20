@@ -44,7 +44,7 @@ cron_temp_out=$(mktemp)
 exec 2>&1 >$cron_temp_out
 
 # Print results for prometheus
-echo "# HELP cronjob_duration Elapsed real (wall clock) time used by the process, in seconds"
+echo "# HELP cronjob_duration Elapsed real time used by the process, in seconds"
 echo "# TYPE cronjob_duration gauge"
 echo "cronjob_duration{name=\"$cronjob_name\"} $cronjob_duration"
 

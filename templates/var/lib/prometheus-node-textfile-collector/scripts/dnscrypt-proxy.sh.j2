@@ -6,7 +6,7 @@
 echo "# HELP dnscrypt_proxy can this hosts hostname be resolved via the local dnscrypt-proxy"
 echo "# TYPE dnscrypt_proxy gauge"
 
-if host {{ inventory_hostname }} 127.0.0.1 2>&1 >/dev/null; then
+if host {{ inventory_hostname }} 127.0.0.1 | grep -q {{ nic_wg_mesh_ip }}; then
     echo "dnscrypt_proxy 1"
 else
     echo "dnscrypt_proxy 0"

@@ -175,12 +175,12 @@ prometheus_exporter_node_textfile_templates_defaults:
     user: root
     cron:
       minute: "*/15"
-  - name: cron-unmonitored.sh
-    src: "templates/var/lib/prometheus-node-textfile-collector/scripts/cron-unmonitored.sh.j2"
-    user: root
-    cron:
-      minute: "0"
-      hour: "0"
+#  - name: cron-unmonitored.sh
+#    src: "templates/var/lib/prometheus-node-textfile-collector/scripts/cron-unmonitored.sh.j2"
+#    user: root
+#    cron:
+#      minute: "0"
+#      hour: "0"
   - name: shorewall.sh
     src: "templates/var/lib/prometheus-node-textfile-collector/scripts/shorewall.sh.j2"
     user: root

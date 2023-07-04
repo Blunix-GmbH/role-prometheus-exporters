@@ -3,6 +3,7 @@
     name:
       - moreutils
       - python3-prometheus-client
+      - wget
     state: present
 
 - name: "exporter node-textfile {{ prometheus_exporter_node_version }} create scripts directory"

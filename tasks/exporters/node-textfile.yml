@@ -1,6 +1,8 @@
 - name: "exporter node-textfile {{ prometheus_exporter_node_version }} install apt requirements"
   apt:
-    name: moreutils
+    name:
+      - moreutils
+      - python3-prometheus-client
     state: present
 
 - name: "exporter node-textfile {{ prometheus_exporter_node_version }} create scripts directory"
